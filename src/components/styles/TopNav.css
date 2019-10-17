@@ -1,0 +1,47 @@
+.top-nav {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+  
+    margin: 0;
+    padding: 0 0 0 10px;
+    background: rgb(85, 110, 110);
+    height: 50px;
+  }
+  .top-nav * {
+    height: 50px;
+    line-height: 50px;
+  }
+  .top-nav .settings {
+    background: rgba(0,0,0,0.2);
+    width: 150px;
+    text-align: center;
+  }
+  .top-nav .settings .settings-logo:hover {
+    background: rgba(0,0,0,0.2);
+  }
+  .top-nav .settings .settings-logo {
+    font-size: 40px;
+  }
+  .top-nav .settings .settings-container {
+    overflow: hidden;
+    min-height: calc(100vh - 50px);
+  }
+  .top-nav .settings .settings-container .settings-menu {
+    display: inline-block;
+    width: 150px;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    
+    transform: translateX(0);
+    transition: transform 400ms ease-in;
+  }
+  .top-nav .settings .settings-container .settings-menu.visible {
+    transform: translateX(0px);
+  }
+  .top-nav .settings .settings-container .settings-menu.hidden {
+    transform: translateX(250px);
+  }
+  

@@ -1,0 +1,7 @@
+.display-box {
+    margin: 0;
+    padding: 0 0 0 5px;
+
+    background: lightcoral;
+    flex: 5;
+}

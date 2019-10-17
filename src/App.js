@@ -1,11 +1,14 @@
 import React from 'react'
+import { StateContextProvider} from './Context'
+
+import './App.css' 
 import SortingVisualizer from './components/SortingVisualizer'
 
 const App = () => {
     return (
-        <div className="main-app">
-            <SortingVisualizer/>
-        </div>
+        <StateContextProvider>
+            <SortingVisualizer /> 
+        </StateContextProvider> 
     );
 }
 
