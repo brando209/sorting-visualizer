@@ -19,12 +19,19 @@ function getColor(index, state) {
             if(index >= state.stack[1]) return 'green';
             return 'grey';
         case 4: // Merge sort
-            if(index >= state.stack[state.stack.length - 1].scope[0] && index <= state.stack[state.stack.length - 1].scope[1]) {
-                return 'green';
+            let current = state.stack[state.stack.length - 1];
+            let mergeOrder = state.stack[0];
+            let mid = Math.floor((current.scope[0] + current.scope[1]) / 2);
+            if(index >= current.scope[0] && index <= current.scope[1]) {
+                if(mergeOrder.mergeOrder && state.numberBoxes[index].isOut && (index === mergeOrder.compared[0] || index === mergeOrder.compared[1])) {
+                    return 'red';
+                }
+                return 'rgba(0, 0, 0, 0.3)';
             }
             return 'grey';
         case 5: // Quick sort
-            if(index === state.stack[state.stack.length - 1].p) return 'red'
+            if(index === state.stack[state.stack.length - 1].p) return 'rgba(0, 0, 0, 0.3)';
+
             return 'grey';
         default:
             return 'transparent';

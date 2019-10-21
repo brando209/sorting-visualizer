@@ -13,7 +13,6 @@ export function numberBoxesFromNumbers(numbers, height, margin) {
                 width: `${number}px`,
                 height: `${height}px`,
                 margin: `${margin}px 0 0 0`,
-                background: 'grey',
                 position: 'relative',
                 top: 0,
                 left: 0,
@@ -21,6 +20,11 @@ export function numberBoxesFromNumbers(numbers, height, margin) {
         }
     });
     return numberBoxes;
+}
+
+function numbersFromNumberBoxes(numberBoxes) {
+    const numbers = numberBoxes.map(numberBox => (numberBox.value));
+    return numbers;
 }
 
 function resetStack(selected, size) {
@@ -40,37 +44,29 @@ function resetStack(selected, size) {
     }
 }
 
-// Merge function used in merge sort algorithm
-// Takes two sorted arrays and combines them, returning one sorted array
-function mergeSortedArrays(a, b) {
-    let newArr = [];
-    let i = 0, j = 0;
+
+function getMergeOrder(numbers, left, mid, right) {
+    let mergeOrder = [];
+    let i = left, j = mid + 1;
     let merging = true;
+
     while (merging) {
-        if (a[i] < b[j]) {
-            newArr.push(a[i]);
-            i++;
+        if (numbers[i] < numbers[j]) {
+            mergeOrder.push(i++);
+        } else {
+            mergeOrder.push(j++);
         }
-        else {
-            newArr.push(b[j]);
-            j++;
-        }
-        if (i === a.length) {
-            //put the rest of b in newArr
-            for (; j < b.length; j++) {
-                newArr.push(b[j]);
-            }
+        if (i === mid + 1) {
+            mergeOrder.push(j);
             merging = false;
         }
-        if (j === b.length) {
-            //put the rest of a in newArr
-            for (; i < a.length; i++) {
-                newArr.push(a[i]);
-            }
+        if (j === right + 1) {
+            mergeOrder.push(i);
             merging = false;
         }
     }
-    return newArr;
+    console.log(mergeOrder);
+    return mergeOrder;
 }
 
 function selection_sort_reducer(state, action) {
@@ -208,20 +204,109 @@ function merge_sort_reducer(state, action) {
             }
         case 'merge':
             numbers = state.numbers.slice();
-            let leftArr = numbers.slice(action.left, action.mid + 1);
-            let rightArr = numbers.slice(action.mid + 1, action.right + 1);
-            let insert = mergeSortedArrays(leftArr, rightArr);
-            insert.forEach((value, i) => {
-                numbers.splice(action.left + i, 1, value);
-            });
+            numberBoxes = state.numberBoxes.slice();
             newStack = state.stack.slice();
-            newStack[newStack.length - 1].instructions.shift();
-            numberBoxes = numberBoxesFromNumbers(numbers, state.boxHeight, state.boxMargin);
-            return { ...state, numbers: numbers, numberBoxes: numberBoxes, stack: newStack };
+            // When we first enter the merge step, move all the boxes in the current 'scope' out of position
+            if (!newStack[0].mergeOrder) {       // Use the bottom of the stack to store merge order
+                // Move each numberBox within the current 'scope' to the right
+                for (let index in state.numbers) {
+                    if (index >= state.stack[state.stack.length - 1].scope[0] && index <= state.stack[state.stack.length - 1].scope[1]) {
+                        numberBoxes[index].style = {
+                            ...numberBoxes[index].style,
+                            left: '600px'
+                        };
+                        numberBoxes[index].isOut = true;
+                    }
+                }
+                // Calculate the order in which to merge and place an object containing this order at the bottom of the stack
+                let mergeOrder = getMergeOrder(numbers, action.left, action.mid, action.right);
+                newStack.unshift({ mergeOrder: mergeOrder, mergeIdx: action.left, compared: [action.left, action.mid + 1] });
+            } else {    // As long as the object with property 'mergeOrder' is at the bottom, merge the next element
+                let next = newStack[0].mergeOrder.shift();          // Index of next element to be merged into original array
+                let idx = newStack[0].mergeIdx;                     // Index where the merged element will be placed
+                const unit = state.boxHeight + state.boxMargin;
+
+                if (next === undefined) {    // We are either finished with this merge step or the rest is already sorted
+                    // If the rest of the numbers out of place are already sorted, move them into correct position
+                    if (idx <= action.right) {
+                        for (let i = 0; i < numberBoxes.length; i++) {
+                            let numberBox = numberBoxes[i];
+                            if (numberBox.isOut) {
+                                console.log("Moving " + ((idx - i) * unit) + 'px');
+                                numberBox.style = {
+                                    ...numberBox.style,
+                                    top: `${(idx - i) * unit}px`,
+                                    left: 0,
+                                }
+                                numberBox.isOut = false;
+                                idx++;
+                            }
+                        }
+                    }
+                    // Remove object with property 'mergeOrder' from the bottom of stack
+                    newStack.shift();
+                    // Remove merge instruction from current 'scope'
+                    newStack[newStack.length - 1].instructions.shift();
+                    // Calculate the index shift amount for each numberBox
+                    let shiftAmt = numberBoxes.map((numberBox) => {
+                        let n = parseFloat(numberBox.style.top)
+                        n /= (state.boxMargin + state.boxHeight);
+                        n = Math.round(n);
+                        return n;
+                    });
+                    // Populate a new array based on previous array and shift amount array
+                    let newArr = Array(numberBoxes.length);
+                    shiftAmt.forEach((shift, index) => {
+                        let newElem = numberBoxes[index];
+                        newElem.style = {
+                            ...newElem.style,
+                            top: 0,
+                        };
+                        newArr[index + shift] = newElem;
+                    });
+                    // Set the numberBoxes and numbers to be in the new order
+                    numberBoxes = newArr;
+                    numbers = numbersFromNumberBoxes(numberBoxes);
+                } else { // Move number box to correct position
+                    let displacement = idx - next;
+                    const newTop = `${displacement * unit}px`;
+
+                    numberBoxes[next].style = {
+                        ...numberBoxes[next].style,
+                        top: newTop,
+                        left: 0,
+                    }
+                    numberBoxes[next].isOut = false;
+                    // Increment the index that the merged element will be inserted into
+                    newStack[0].mergeIdx += 1;
+                    // Increment which elements are being compared
+                    (next <= action.mid) ? newStack[0].compared[0]++ : newStack[0].compared[1]++;
+                }
+            }
+            return {
+                ...state,
+                numbers: numbers,
+                numberBoxes: numberBoxes,
+                stack: newStack,
+            }
         default:
             return state;
     }
 }
+
+/* function partition(left, right) {
+    let pivot = state.numbers[right];
+    let i = left - 1;
+
+    for (let j = left; j < right; j++) {
+        if (state.numbers[j] < pivot) {
+            i++;
+            swap(i, j);
+        }
+    }
+    swap(i + 1, right);
+    return i + 1;
+} */
 
 function quick_sort_reducer(state, action) {
     let newStack;
@@ -278,13 +363,13 @@ export default function reducer(state, action) {
                 case 'speed-change':
                     return { ...state, speed: Number(action.speed) };
                 case 'selection-change':
-                    numbers = randomArr(state.size);
-                    numberBoxes = numberBoxesFromNumbers(numbers, state.boxHeight, state.boxMargin);
+                    // numbers = randomArr(state.size);
+                    // numberBoxes = numberBoxesFromNumbers(numbers, state.boxHeight, state.boxMargin);
                     return {
                         ...state,
                         selected: Number(action.selection),
-                        numbers: numbers,
-                        numberBoxes: numberBoxes,
+                        // numbers: numbers,
+                        // numberBoxes: numberBoxes,
                         stack: resetStack(Number(action.selection), state.size)
                     };
                 case 'change-box-size':

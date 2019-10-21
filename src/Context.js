@@ -1,5 +1,5 @@
 import React, { useReducer, useMemo, createContext } from 'react'
-import reducer, { randomArr } from './reducer'
+import reducer, { randomArr, numberBoxesFromNumbers } from './reducer'
 
 export const StateContext = createContext();
 
@@ -8,20 +8,7 @@ function initialState() {
     const numbers = randomArr(size);
     const boxHeight = 25;
     const boxMargin = 5;
-    const numberBoxes = numbers.map(number => {
-        return {
-            value: number,
-            isOut: false,
-            style: {
-                width: `${number * 10}px`,
-                height: `${boxHeight}px`,
-                margin: `${boxMargin}px 0 0 0`,
-                position: 'relative',
-                top: 0,
-                left: 0,
-            }
-        }
-    });
+    const numberBoxes = numberBoxesFromNumbers(numbers);
     return {
         size: size,
         numbers: numbers,
