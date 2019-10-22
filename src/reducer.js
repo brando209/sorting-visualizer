@@ -65,8 +65,22 @@ function getMergeOrder(numbers, left, mid, right) {
             merging = false;
         }
     }
-    console.log(mergeOrder);
     return mergeOrder;
+}
+
+function getPartitionOrder(numbers, left, right) {
+    let partitionOrder = [];
+    let pivot = numbers[right];
+    let i = left - 1;
+
+    for (let j = left; j < right; j++) {
+        if (numbers[j] < pivot) {
+            i++;
+            partitionOrder.push([i, j]);
+        }
+    }
+    partitionOrder.push([i + 1, right]);
+    return partitionOrder;
 }
 
 function selection_sort_reducer(state, action) {
@@ -294,29 +308,38 @@ function merge_sort_reducer(state, action) {
     }
 }
 
-/* function partition(left, right) {
-    let pivot = state.numbers[right];
-    let i = left - 1;
-
-    for (let j = left; j < right; j++) {
-        if (state.numbers[j] < pivot) {
-            i++;
-            swap(i, j);
-        }
-    }
-    swap(i + 1, right);
-    return i + 1;
-} */
-
 function quick_sort_reducer(state, action) {
-    let newStack;
+    let newStack, numbers, numberBoxes;
     switch (action.type) {
         case 'partition':
             newStack = state.stack.slice();
-            newStack[newStack.length - 1].instructions.shift();
-            newStack[newStack.length - 1].p = action.p;
+            numbers = state.numbers.slice();
+            numberBoxes = state.numberBoxes.slice();
+
+            if(!newStack[0].partitionOrder) {
+                let partitionOrder = getPartitionOrder(state.numbers, action.left, action.right);
+                let partitionIdx = partitionOrder[partitionOrder.length - 1][0];
+                newStack.unshift({ partitionOrder: partitionOrder, partitionIdx: partitionIdx })
+                newStack[newStack.length - 1].p = partitionIdx;
+            } else {
+                let nextSwap = newStack[0].partitionOrder.shift();
+            
+                if(nextSwap === undefined) {
+                    newStack[newStack.length - 1].instructions.shift();
+                    newStack.shift();
+                } else {
+                    // Swap
+                    let temp = numbers[nextSwap[0]];
+                    numbers[nextSwap[0]] = numbers[nextSwap[1]];
+                    numbers[nextSwap[1]] = temp;
+                    numberBoxes = numberBoxesFromNumbers(numbers, state.boxHeight, state.boxMargin);
+                }
+                
+            }
             return {
                 ...state,
+                numbers: numbers,
+                numberBoxes: numberBoxes,
                 stack: newStack,
             }
         case 'recurse-l':

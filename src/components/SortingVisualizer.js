@@ -63,23 +63,23 @@ const SortingVisualizer = () => {
     function stepInsertionSort() {
         let [i, k, j] = state.stack;
 
-        if(i >= state.numberBoxes.length) {
+        if (i >= state.numberBoxes.length) {
             console.log("Done!")
             dispatch({ type: 'toggle-run' });
             return;
         }
-        if(j === state.numberBoxes.length - 1) {
+        if (j === state.numberBoxes.length - 1) {
             dispatch({ algorithm: 'insertion-sort', type: 'set-state' })
             return;
         }
-        if(j < 0) {
+        if (j < 0) {
             dispatch({ algorithm: 'insertion-sort', type: 'move-key-in', key: k });
             return;
         }
 
-        if(state.numberBoxes[i].value < state.numberBoxes[j].value) {
+        if (state.numberBoxes[i].value < state.numberBoxes[j].value) {
             console.log(state.numberBoxes[i].value + " < " + state.numberBoxes[j].value);
-            if(state.numberBoxes[k].isOut) {
+            if (state.numberBoxes[k].isOut) {
                 dispatch({ algorithm: 'insertion-sort', type: 'move-key-up', key: k })
             }
             else {
@@ -87,7 +87,7 @@ const SortingVisualizer = () => {
             }
         }
         else {
-            dispatch({ algorithm: 'insertion-sort',     type: 'move-key-in', key: k })
+            dispatch({ algorithm: 'insertion-sort', type: 'move-key-in', key: k })
         }
     }
 
@@ -165,7 +165,6 @@ const SortingVisualizer = () => {
         let l = next.scope[0];
         let r = next.scope[1];
         let p = next.p;
-        let pIndex;
 
         if (instruction === 'return') {
             if (state.stack.length === 1) {
@@ -182,8 +181,7 @@ const SortingVisualizer = () => {
         }
 
         if (instruction === 'partition') {
-            pIndex = partition(l, r);
-            dispatch({ algorithm: 'quick-sort', type: "partition", p: pIndex });
+            dispatch({ algorithm: 'quick-sort', type: "partition", left: l, right: r });
         }
         else if (instruction === 'recurse-l') {
             dispatch({ algorithm: 'quick-sort', type: 'recurse-l', left: l, p: p });
@@ -192,30 +190,15 @@ const SortingVisualizer = () => {
         }
     }
 
-    // Partition function used for Quick Sort algorithm
-    function partition(left, right) {
-        let pivot = state.numbers[right];
-        let i = left - 1;
-
-        for (let j = left; j < right; j++) {
-            if (state.numbers[j] < pivot) {
-                i++;
-                swap(i, j);
-            }
-        }
-        swap(i + 1, right);
-        return i + 1;
-    }
-
     function swap(a, b) {
-        dispatch({ type: 'swap' , a, b });
+        dispatch({ type: 'swap', a, b });
     }
 
     return (
         <div className='sorting-visualizer'>
             <TopNav />
             <div className="main-app">
-                <SideNav onReset={handleReset} onStep={handleStep} onRun={handleRun}/>
+                <SideNav onReset={handleReset} onStep={handleStep} onRun={handleRun} />
                 <DisplayBox />
             </div>
         </div>
