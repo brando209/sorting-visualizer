@@ -1,7 +1,14 @@
 .display-box {
     margin: 0;
-    padding: 0 0 0 5px;
+    padding: 2px 20px;
 
-    background: lightcoral;
+    background: rgb(158, 158, 158);
     flex: 5;
+}
+
+.number-box.transitionable {
+    /* transition: left 0.4s ease-in, top 0.2s ease-in; */
+    transition-property: left, top;
+    transition-timing-function: ease-in, ease-in;
+    transition-duration: 0.4s, 0.2s;
 }

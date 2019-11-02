@@ -26,7 +26,7 @@
   appearance: none;
   width: 25px; 
   height: 25px; 
-  background: #4CAF50; 
+  background: rgb(33, 175, 220); 
   cursor: pointer;
 }
 .slider::-moz-range-thumb {
@@ -34,6 +34,6 @@
   border-radius: 15%;
   width: 25px; /* Set a specific slider handle width */
   height: 25px; /* Slider handle height */
-  background: rgb(40, 168, 177); /* Green background */
+  background: rgb(33, 175, 220); 
   cursor: pointer; /* Cursor on hover */
 }

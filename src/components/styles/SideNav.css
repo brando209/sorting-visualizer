@@ -1,13 +1,31 @@
 .side-nav {
-    min-height: calc(100vh - 50px); /* TopNav is 50px */
+    min-height: 94vh; /* TopNav is 6vh*/
+    max-width: 20vw;
+    min-width: 20vw;
+    
     background: rgb(60, 65, 75);
     text-align: center;
 
     flex: 1;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
 }
 .side-nav * {
     margin: 0;
 }
+.side-nav .horizontal-line {
+    background:  rgb(33, 175, 220);
+    height: 0.3vh;
+    border-radius: 50%;
+    width: 80%;
+}
 .side-nav .instructions {
-    padding: 15px 5px;
+    font-size: 2vh;
+    padding: 10px;
+}
+.side-nav .controls-panel {
+
 }

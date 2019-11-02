@@ -1,17 +1,21 @@
 .button {
+  display: inline-block;
+  box-sizing: border-box;
   background: rgb(94, 94, 94);
-  color: white;
+  box-shadow: 2px 2px 1px 1px rgb(41, 41, 41);
   text-align: center;
   line-height: 2em;
   border-radius: 5px;
-  margin: 2em auto;
-  width: 4em;
+  margin: 1em 1em;
+  width: 5em;
   height: 2em;
 }
 .button:hover {
-  background: rgba(94, 94, 94, 0.5);
+  background: rgb(94, 94, 94);
+  color: rgb(33, 175, 220);
   cursor: pointer;
 }
 .button:active {
-  color: black;
+  color: rgb(33, 175, 220);
+  box-shadow: 2px 2px 1px 1px rgb(41, 41, 41) inset;
 }

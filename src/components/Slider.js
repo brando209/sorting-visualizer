@@ -9,6 +9,7 @@ const Slider = (props) => {
                 type="range" 
                 min={props.min} 
                 max={props.max} 
+                step={props.step}
                 value={props.value} 
                 className="slider" 
                 id="myRange" 

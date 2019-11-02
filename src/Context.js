@@ -4,20 +4,22 @@ import reducer, { randomArr, numberBoxesFromNumbers } from './reducer'
 export const StateContext = createContext();
 
 function initialState() {
-    const size = 10;
+    const size = 6;
     const numbers = randomArr(size);
-    const boxHeight = 25;
-    const boxMargin = 5;
+    const boxHeight = 75;
+    const boxMargin = 15;
     const numberBoxes = numberBoxesFromNumbers(numbers);
+    
     return {
         size: size,
         numbers: numbers,
+        reserve: numbers,
         boxHeight: boxHeight,
         boxMargin: boxMargin,
         selected: 0,
         isRunning: false,
         speed: 90, 
-        numberBoxes: numberBoxes, 
+        numberBoxes: numberBoxes,
         stack: null,
     }
 }

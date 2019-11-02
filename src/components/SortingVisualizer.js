@@ -16,10 +16,14 @@ const SortingVisualizer = () => {
         (state.selected === 4 && stepMergeSort) ||
         (state.selected === 5 && stepQuickSort);
 
-    useInterval(sorter, state.isRunning ? (1000 - (state.speed * 10)) : null);
+    useInterval(sorter, state.isRunning ? (1010 - (state.speed * 10)) : null);
 
     const handleReset = () => {
         dispatch({ type: 'reset' });
+    }
+
+    const handleRandom = () => {
+        dispatch({ type: 'random' });
     }
 
     const handleStep = () => {
@@ -35,11 +39,6 @@ const SortingVisualizer = () => {
     }
 
     function stepSelectionSort() {
-        if (state.stack[0] === null) {
-            dispatch({ type: 'init-stack' });
-            return;
-        }
-
         let [insertionIndex, currentIndex, minIndex] = state.stack;
         if (insertionIndex === state.numbers.length) {
             dispatch({ type: 'toggle-run' });
@@ -61,43 +60,35 @@ const SortingVisualizer = () => {
     }
 
     function stepInsertionSort() {
-        let [i, k, j] = state.stack;
-
-        if (i >= state.numberBoxes.length) {
-            console.log("Done!")
+        // Initialized to [1, 1, 0]
+        let [insert, key, compare] = state.stack;
+        // Insert has passed the end of the number list, done
+        if (insert >= state.numberBoxes.length) {
             dispatch({ type: 'toggle-run' });
             return;
         }
-        if (j === state.numberBoxes.length - 1) {
-            dispatch({ algorithm: 'insertion-sort', type: 'set-state' })
-            return;
-        }
-        if (j < 0) {
-            dispatch({ algorithm: 'insertion-sort', type: 'move-key-in', key: k });
+        // Key goes in the beginning of list
+        if (compare < 0) {
+            (state.numberBoxes[key].isOut) ? 
+                dispatch({ algorithm: 'insertion-sort', type: 'move-key-in', key: key }) :
+                dispatch({ algorithm: 'insertion-sort', type: 'set-state' });
             return;
         }
 
-        if (state.numberBoxes[i].value < state.numberBoxes[j].value) {
-            console.log(state.numberBoxes[i].value + " < " + state.numberBoxes[j].value);
-            if (state.numberBoxes[k].isOut) {
-                dispatch({ algorithm: 'insertion-sort', type: 'move-key-up', key: k })
-            }
-            else {
-                dispatch({ algorithm: 'insertion-sort', type: 'move-key-out', key: k })
-            }
+        if (state.numberBoxes[insert].value < state.numberBoxes[compare].value) {
+            (state.numberBoxes[key].isOut) ?
+                dispatch({ algorithm: 'insertion-sort', type: 'move-key-up', key: key }) :
+                dispatch({ algorithm: 'insertion-sort', type: 'move-key-out', key: key });
         }
         else {
-            dispatch({ algorithm: 'insertion-sort', type: 'move-key-in', key: k })
+            (state.numberBoxes[key].isOut) ? 
+                dispatch({ algorithm: 'insertion-sort', type: 'move-key-in', key: key }) :
+                dispatch({ algorithm: 'insertion-sort', type: 'set-state' });
         }
     }
 
     function stepBubbleSort() {
-        if (state.stack[0] === null) {
-            dispatch({ type: 'init-stack' });
-            return;
-        }
-
-        let [i, , swapped] = state.stack; // TODO: Only using 2 variables
+        let [i, , swapped] = state.stack;
         if (state.numbers[i] > state.numbers[i + 1]) {
             swap(i, i + 1);
             // A pass has completed in which swaps have occured, reset for next pass
@@ -198,7 +189,7 @@ const SortingVisualizer = () => {
         <div className='sorting-visualizer'>
             <TopNav />
             <div className="main-app">
-                <SideNav onReset={handleReset} onStep={handleStep} onRun={handleRun} />
+                <SideNav onRandom={handleRandom} onReset={handleReset} onStep={handleStep} onRun={handleRun} />
                 <DisplayBox />
             </div>
         </div>

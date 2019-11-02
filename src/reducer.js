@@ -1,11 +1,46 @@
+function randomBetween(a, b) {
+    return Math.floor(Math.random() * (b - a)) + a;
+}
+
 export function randomArr(size) {
     let arr = Array(size).fill(1);
-    arr = arr.map(() => (Math.floor(Math.random() * (500 - 10)) + 10));
+    arr = arr.map(() => (randomBetween(10, 500)));
     return arr;
 }
 
+function getSortedOrder(initialOrder) {
+    let indices = Array(initialOrder.length).fill(0).map((z, i) => i);
+    let sortedIndices = indices.sort((a, b) => {
+        if(initialOrder[a] < initialOrder[b]) {
+            return -1;
+        } else if(initialOrder[a] > initialOrder[b]) {
+            return 1;
+        }
+        return 0;
+    });
+    return sortedIndices;
+}
+
+// Modified version of code found here:
+// https://codepen.io/mradamcole/pen/yWXyPz
+function getRainbow(size) {
+    let colors = [];
+
+    const rainbowStop = h => {
+        const f = (n, k = (n + h * 12) % 12) => .5 - .5 * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+        const rgb2hex = (r, g, b) => "#" + [r, g, b].map(x => Math.round(x * 255).toString(16).padStart(2, 0)).join('');
+        return (rgb2hex(f(0), f(8), f(4)));
+    }
+
+    for (let i = 0; i < size; i++) {
+        let c = i / size;
+        colors.push(rainbowStop(c));
+    }
+    return colors;
+}
+
 export function numberBoxesFromNumbers(numbers, height, margin) {
-    const numberBoxes = numbers.map(number => {
+    const numberBoxes = numbers.map((number, index) => {
         return {
             value: number,
             isOut: false,
@@ -27,6 +62,23 @@ function numbersFromNumberBoxes(numberBoxes) {
     return numbers;
 }
 
+// Removes the 'transitionable' class on the 'numberBoxes'
+function transitionOff() {
+    let numboxRefs = document.querySelectorAll(".number-box");
+    for (let numbox of numboxRefs) {
+        numbox.classList.toggle('transitionable', false);
+    }
+}
+
+
+// Adds the 'transitionable' class on the 'numberBoxes'
+function transitionOn() {
+    let numboxRefs = document.querySelectorAll(".number-box");
+    for (let numbox of numboxRefs) {
+        numbox.classList.toggle('transitionable', true);
+    }
+}
+
 function resetStack(selected, size) {
     switch (selected) {
         case 1:
@@ -43,7 +95,6 @@ function resetStack(selected, size) {
             return null;
     }
 }
-
 
 function getMergeOrder(numbers, left, mid, right) {
     let mergeOrder = [];
@@ -83,6 +134,27 @@ function getPartitionOrder(numbers, left, right) {
     return partitionOrder;
 }
 
+function getIndexShifted(numberBoxes, height, margin) {
+    // Calculate the index shift amount for each numberBox
+    let shiftAmt = numberBoxes.map((numberBox) => {
+        let n = parseFloat(numberBox.style.top)
+        n /= (margin + height);
+        n = Math.round(n);
+        return n;
+    });
+    // Populate a new array based on previous array and shift amount array
+    let indexShifted = Array(numberBoxes.length);
+    shiftAmt.forEach((shift, index) => {
+        let newElem = numberBoxes[index];
+        newElem.style = {
+            ...newElem.style,
+            top: 0,
+        };
+        indexShifted[index + shift] = newElem;
+    });
+    return indexShifted;
+}
+
 function selection_sort_reducer(state, action) {
     let insertionIdx, currentIdx, minIdx;
 
@@ -114,6 +186,9 @@ function insertion_sort_reducer(state, action) {
     let newNumBoxes = state.numberBoxes.slice();
     let newStack = state.stack.slice();
     let [, k, j] = newStack;
+    let indexShifted;
+
+    transitionOn();
 
     switch (action.type) {
         case 'move-key-out':
@@ -149,26 +224,16 @@ function insertion_sort_reducer(state, action) {
                 ...newNumBoxes[action.key].style,
                 left: 0
             };
-        case 'set-state':
-            let shiftAmt = newNumBoxes.map((numberBox) => {
-                let n = parseFloat(numberBox.style.top)
-                n /= (state.boxMargin + state.boxHeight);
-                n = Math.round(n);
-                console.log(n)
-                return n;
-            });
-            let newArr = Array(newNumBoxes.length);
-            shiftAmt.forEach((shift, index) => {
-                let newElem = newNumBoxes[index];
-                newElem.style = {
-                    ...newElem.style,
-                    top: 0,
-                };
-                newArr[index + shift] = newElem;
-            });
             return {
                 ...state,
-                numberBoxes: newArr,
+                numberBoxes: newNumBoxes,
+            }
+        case 'set-state':
+            indexShifted = getIndexShifted(newNumBoxes, state.boxHeight, state.boxMargin);
+            transitionOff();
+            return {
+                ...state,
+                numberBoxes: indexShifted,
                 stack: [k + 1, k + 1, k]
             }
         default:
@@ -204,6 +269,7 @@ function bubble_sort_reducer(state, action) {
 
 function merge_sort_reducer(state, action) {
     let numbers, newStack, numberBoxes;
+    transitionOn();
 
     switch (action.type) {
         case 'recurse-l':
@@ -242,11 +308,11 @@ function merge_sort_reducer(state, action) {
 
                 if (next === undefined) {    // We are either finished with this merge step or the rest is already sorted
                     // If the rest of the numbers out of place are already sorted, move them into correct position
+                    // If there are any out do move else do index shift
                     if (idx <= action.right) {
                         for (let i = 0; i < numberBoxes.length; i++) {
                             let numberBox = numberBoxes[i];
                             if (numberBox.isOut) {
-                                console.log("Moving " + ((idx - i) * unit) + 'px');
                                 numberBox.style = {
                                     ...numberBox.style,
                                     top: `${(idx - i) * unit}px`,
@@ -261,26 +327,13 @@ function merge_sort_reducer(state, action) {
                     newStack.shift();
                     // Remove merge instruction from current 'scope'
                     newStack[newStack.length - 1].instructions.shift();
-                    // Calculate the index shift amount for each numberBox
-                    let shiftAmt = numberBoxes.map((numberBox) => {
-                        let n = parseFloat(numberBox.style.top)
-                        n /= (state.boxMargin + state.boxHeight);
-                        n = Math.round(n);
-                        return n;
-                    });
-                    // Populate a new array based on previous array and shift amount array
-                    let newArr = Array(numberBoxes.length);
-                    shiftAmt.forEach((shift, index) => {
-                        let newElem = numberBoxes[index];
-                        newElem.style = {
-                            ...newElem.style,
-                            top: 0,
-                        };
-                        newArr[index + shift] = newElem;
-                    });
+
+                    let indexShifted = getIndexShifted(numberBoxes, state.boxHeight, state.boxMargin)
                     // Set the numberBoxes and numbers to be in the new order
-                    numberBoxes = newArr;
+                    numberBoxes = indexShifted;
                     numbers = numbersFromNumberBoxes(numberBoxes);
+
+                    transitionOff();
                 } else { // Move number box to correct position
                     let displacement = idx - next;
                     const newTop = `${displacement * unit}px`;
@@ -316,15 +369,15 @@ function quick_sort_reducer(state, action) {
             numbers = state.numbers.slice();
             numberBoxes = state.numberBoxes.slice();
 
-            if(!newStack[0].partitionOrder) {
+            if (!newStack[0].partitionOrder) {
                 let partitionOrder = getPartitionOrder(state.numbers, action.left, action.right);
                 let partitionIdx = partitionOrder[partitionOrder.length - 1][0];
                 newStack.unshift({ partitionOrder: partitionOrder, partitionIdx: partitionIdx })
                 newStack[newStack.length - 1].p = partitionIdx;
             } else {
                 let nextSwap = newStack[0].partitionOrder.shift();
-            
-                if(nextSwap === undefined) {
+                console.log(nextSwap);
+                if (nextSwap === undefined) {
                     newStack[newStack.length - 1].instructions.shift();
                     newStack.shift();
                 } else {
@@ -334,7 +387,7 @@ function quick_sort_reducer(state, action) {
                     numbers[nextSwap[1]] = temp;
                     numberBoxes = numberBoxesFromNumbers(numbers, state.boxHeight, state.boxMargin);
                 }
-                
+
             }
             return {
                 ...state,
@@ -358,7 +411,7 @@ function quick_sort_reducer(state, action) {
 }
 
 export default function reducer(state, action) {
-    let numbers, numberBoxes, newStack, returnTo;
+    let numbers, numberBoxes, colorBoxes, newStack, returnTo;
 
     switch (action.algorithm) {
         case 'selection-sort':
@@ -380,19 +433,22 @@ export default function reducer(state, action) {
                         ...state,
                         size: Number(action.size),
                         numbers: numbers,
+                        reserve: numbers,
                         numberBoxes: numberBoxes,
                         stack: resetStack(state.selected, Number(action.size)),
+                        isRunning: false,
                     };
                 case 'speed-change':
                     return { ...state, speed: Number(action.speed) };
                 case 'selection-change':
-                    // numbers = randomArr(state.size);
-                    // numberBoxes = numberBoxesFromNumbers(numbers, state.boxHeight, state.boxMargin);
+                    numbers = state.reserve;
+                    numberBoxes = numberBoxesFromNumbers(numbers, state.boxHeight, state.boxMargin);
                     return {
                         ...state,
                         selected: Number(action.selection),
-                        // numbers: numbers,
-                        // numberBoxes: numberBoxes,
+                        numbers: numbers,
+                        numberBoxes: numberBoxes,
+                        isRunning: false,
                         stack: resetStack(Number(action.selection), state.size)
                     };
                 case 'change-box-size':
@@ -403,7 +459,7 @@ export default function reducer(state, action) {
                         boxMargin: action.margin,
                         numberBoxes: numberBoxes,
                     }
-                case 'reset':
+                case 'random':
                     numbers = randomArr(state.size);
                     numberBoxes = numberBoxesFromNumbers(numbers, state.boxHeight, state.boxMargin);
                     return {
@@ -411,17 +467,30 @@ export default function reducer(state, action) {
                         stack: resetStack(state.selected, state.size),
                         isRunning: false,
                         numbers: numbers,
+                        reserve: numbers,
                         numberBoxes: numberBoxes
                     };
-                case 'init-stack':
+                case 'reset':
+                    numberBoxes = numberBoxesFromNumbers(state.reserve, state.boxHeight, state.boxMargin);
                     return {
                         ...state,
                         stack: resetStack(state.selected, state.size),
-                    }
+                        isRunning: false,
+                        numbers: state.reserve,
+                        numberBoxes: numberBoxes
+                    };
                 case 'toggle-run':
                     return { ...state, isRunning: !state.isRunning };
                 case 'finish':
                     return { ...state, stack: [state.size, 0, state.size] }
+                case 'change-mode':
+                    numbers = state.reserve;
+
+                    return {
+                        ...state,
+                        numbers: numbers,
+                        colorMode: !state.colorMode,
+                    }
                 case 'swap':
                     numbers = state.numbers.slice();
                     let temp = numbers[action.a];

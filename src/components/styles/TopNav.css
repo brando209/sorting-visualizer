@@ -1,47 +1,97 @@
 .top-nav {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+
+  margin: 0;
+  padding: 0 0 0 10px;
+  background: rgb(70, 92, 92);
+  font-size: 2vh;
+  height: 6vh;
+}
+.top-nav * {
+  height: 100%;
+  line-height: 1.5em;
+
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.top-nav h1 {
+  flex: 4;
+  letter-spacing: 0.1em;
+  font-family: 'Inconsolata', monospace;
+}
+.top-nav .nav-links-container {
+  flex: 10;
+}
+.top-nav .nav-links-container .nav-links {
+  background: rgb(85, 110, 110);
+
+  display: flex;
+  flex-direction: row;
+
+  justify-content: space-around;
+
+  list-style: none;
+}
+.top-nav .nav-links-container .nav-links li {
+  flex: 1;
+  padding: 1em;
+  text-align: center;
+  font-family: 'Roboto Mono', monospace;
+}
+.top-nav .nav-links-container .nav-links li:hover {
+  background: rgba(0,0,0,0.2); 
+  color: rgb(33, 175, 220);
+  border-bottom: 0.5vh solid rgb(33, 175, 220);
+}
+.top-nav .nav-links-container .nav-links li.active {
+  background: rgba(0,0,0,0.2); 
+  color: rgb(33, 175, 220);
+  border-bottom: 0.5vh solid rgb(33, 175, 220);
+}
+
+.top-nav .settings {
+  flex: 1;
+
+  background: rgba(0,0,0,0.2);
+  text-align: center;
+  transition: flex 400ms ease-in;
+}
+.top-nav .settings .settings-logo:hover {
+  background: rgba(0,0,0,0.2);
+}
+.top-nav .settings .settings-logo {
+  font-size: 200%;
+  width: 100%;
+}
+.top-nav .settings .settings-container {
+  overflow: hidden;
+  min-height: 94vh;
+  min-width: 100%;
+}
+.top-nav .settings .settings-container .settings-content {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.9);
   
-    margin: 0;
-    padding: 0 0 0 10px;
-    background: rgb(85, 110, 110);
-    height: 50px;
-  }
-  .top-nav * {
-    height: 50px;
-    line-height: 50px;
-  }
-  .top-nav .settings {
-    background: rgba(0,0,0,0.2);
-    width: 150px;
-    text-align: center;
-  }
-  .top-nav .settings .settings-logo:hover {
-    background: rgba(0,0,0,0.2);
-  }
-  .top-nav .settings .settings-logo {
-    font-size: 40px;
-  }
-  .top-nav .settings .settings-container {
-    overflow: hidden;
-    min-height: calc(100vh - 50px);
-  }
-  .top-nav .settings .settings-container .settings-menu {
-    display: inline-block;
-    width: 150px;
-    height: 100%;
-    background: rgba(0,0,0,0.9);
-    
-    transform: translateX(0);
-    transition: transform 400ms ease-in;
-  }
-  .top-nav .settings .settings-container .settings-menu.visible {
-    transform: translateX(0px);
-  }
-  .top-nav .settings .settings-container .settings-menu.hidden {
-    transform: translateX(250px);
-  }
-  
+  transform: translateX(0);
+  transition: transform 400ms ease-in;
+}
+.top-nav .settings .settings-container .settings-content.visible {
+  transform: translateX(0px);
+}
+.top-nav .settings .settings-container .settings-content.hidden {
+  transform: translateX(250px);
+}
+.top-nav .vertical-line {
+  width: 0.15vw;
+  height: 100%;
+  border-radius: 50% 50% 0 0;
+  background: rgb(33, 175, 220);
+}
+/* Make responsive for less then 720px width */
