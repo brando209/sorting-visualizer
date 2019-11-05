@@ -33,7 +33,7 @@ function getDetailText(selection) {
             return (
                 <span className='description-text'>
                     The insertion sort algorithm sorts an array by repeatedly moving the first element of the <span style={unsortedElementStyle}>unsorted subarray</span> into its correct position within the <span style={sortedElementStyle}>sorted subarray</span>.
-                     In every iteration of insertion sort, the <span style={minElementStyle}>next element</span> of the <span style={unsortedElementStyle}>unsorted subarray</span> is compared with elements from the <span style={sortedElementStyle}>sorted subarray</span> until its position is found and it is inserted into this position.
+                     In every iteration of insertion sort, the <span style={minElementStyle}>next element</span> of the <span style={unsortedElementStyle}>unsorted subarray</span> is compared with elements from the <span style={sortedElementStyle}>sorted subarray</span> until its position is found and it is inserted into that position.
                 </span>
             );
         case 3:
